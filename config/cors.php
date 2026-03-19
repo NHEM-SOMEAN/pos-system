@@ -19,7 +19,10 @@ return [
 
     'allowed_methods' => ['*'],
 
-    'allowed_origins' => ['http://localhost:5173'],
+    'allowed_origins' => [
+    'http://localhost:5173',
+    'https://pos-system-63z74m3rc-nhem-someans-projects.vercel.app',
+],
 
     'allowed_origins_patterns' => [],
 
