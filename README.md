@@ -5,6 +5,7 @@
 ![Laravel](https://img.shields.io/badge/Laravel-12-red)
 ![React](https://img.shields.io/badge/React-18-blue)
 ![MySQL](https://img.shields.io/badge/MySQL-8-orange)
+![KHQR](https://img.shields.io/badge/KHQR-Bakong-green)
 
 ---
 
@@ -33,17 +34,20 @@ A full-featured **Web-Based Point of Sale (POS) System** built for retail shops 
 
 ## ✨ Features
 
-### 🔐 Authentication
+### 🔐 Authentication & Security
 - Login/Logout with Laravel Sanctum
-- Role-based access (Admin & Cashier)
-- Protected routes
+- Role-based access control (Admin & Cashier)
+- Protected routes (Frontend + Backend)
+- Admin-only: Products, Categories, Staff management
+- Cashier-only: POS, Orders view
 
 ### 🛒 POS Interface
 - Product grid with search & category filter
 - Cart management (add, remove, quantity)
 - Discount input
 - Cash payment + change calculator
-- KHQR QR code payment
+- **Real KHQR Dynamic QR payment via Bakong API**
+- Auto polling payment status every 3 seconds
 - Receipt generation & print
 
 ### 📦 Product Management (Admin only)
@@ -88,7 +92,7 @@ A full-featured **Web-Based Point of Sale (POS) System** built for retail shops 
 ### Backend Setup (Laravel)
 ```bash
 # Clone repository
-git clone https://github.com/yourusername/pos-system.git
+git clone https://github.com/NHEM-SOMEAN/pos-system.git
 cd pos-system
 
 # Install dependencies
@@ -97,10 +101,15 @@ composer install
 # Copy environment file
 cp .env.example .env
 
-# Configure database in .env
+# Configure .env
 DB_DATABASE=pos_system
 DB_USERNAME=root
 DB_PASSWORD=
+
+BAKONG_TOKEN=your_bakong_token
+BAKONG_ACCOUNT_ID=your_bakong_id
+BAKONG_MERCHANT_NAME="Your Shop Name"
+BAKONG_MERCHANT_CITY="Phnom Penh"
 
 # Generate app key
 php artisan key:generate
@@ -140,12 +149,12 @@ npm run dev
 ## 📱 KHQR Payment Flow
 
 1. Cashier clicks **Pay with KHQR**
-2. System generates Dynamic QR via Bakong API
-3. Customer scans with ABA / ACLEDA / Wing
-4. Frontend polls every 3 seconds
+2. System generates Dynamic QR via **Bakong API**
+3. Customer scans with **ABA / ACLEDA / Wing** or any Bakong-supported app
+4. Frontend polls every **3 seconds** to check payment status
 5. Payment confirmed → Order saved → Receipt printed
 
-> **Note:** Currently using Mock QR for development. Replace with real Bakong API token for production.
+> **Note:** Requires Bakong API token from https://api-bakong.nbc.gov.kh/register
 
 ---
 
@@ -166,6 +175,7 @@ pos-system/
 │   └── Http/Controllers/API/
 │       ├── AuthController.php
 │       ├── DashboardController.php
+│       ├── KHQRController.php
 │       ├── ProductController.php
 │       ├── CategoryController.php
 │       ├── OrderController.php
@@ -208,4 +218,4 @@ npm run build
 
 ## 📄 License
 
-MIT License — NHEM SOMEAN © 2026ឋ
+MIT License — NHEM SOMEAN © 2026

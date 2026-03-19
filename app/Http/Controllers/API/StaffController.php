@@ -1,7 +1,5 @@
 <?php
-
 namespace App\Http\Controllers\API;
-
 use App\Http\Controllers\Controller;
 use App\Models\User;
 use Illuminate\Http\Request;
@@ -9,15 +7,6 @@ use Illuminate\Support\Facades\Hash;
 
 class StaffController extends Controller
 {
-    public function __construct()
-{
-    $this->middleware(function ($request, $next) {
-        if ($request->user()->role !== 'admin') {
-            return response()->json(['message' => 'Unauthorized. Admin only.'], 403);
-        }
-        return $next($request);
-    })->except(['index', 'show']);
-}
     // GET /api/staff
     public function index()
     {
@@ -28,20 +17,21 @@ class StaffController extends Controller
     // POST /api/staff
     public function store(Request $request)
     {
+        if ($request->user()->role !== 'admin') {
+            return response()->json(['message' => 'Unauthorized. Admin only.'], 403);
+        }
         $request->validate([
             'name'     => 'required|string|max:255',
             'email'    => 'required|email|unique:users,email',
             'password' => 'required|string|min:6',
             'role'     => 'required|in:cashier,admin',
         ]);
-
         $staff = User::create([
             'name'     => $request->name,
             'email'    => $request->email,
             'password' => Hash::make($request->password),
             'role'     => $request->role,
         ]);
-
         return response()->json($staff, 201);
     }
 
@@ -58,34 +48,36 @@ class StaffController extends Controller
     // PUT /api/staff/{id}
     public function update(Request $request, $id)
     {
+        if ($request->user()->role !== 'admin') {
+            return response()->json(['message' => 'Unauthorized. Admin only.'], 403);
+        }
         $staff = User::find($id);
         if (!$staff) {
             return response()->json(['message' => 'Staff not found'], 404);
         }
-
         $request->validate([
             'name'  => 'required|string|max:255',
             'email' => 'required|email|unique:users,email,' . $id,
             'role'  => 'required|in:cashier,admin',
         ]);
-
         $staff->update([
             'name'  => $request->name,
             'email' => $request->email,
             'role'  => $request->role,
         ]);
-
         return response()->json($staff);
     }
 
     // DELETE /api/staff/{id}
     public function destroy($id)
     {
+        if (request()->user()->role !== 'admin') {
+            return response()->json(['message' => 'Unauthorized. Admin only.'], 403);
+        }
         $staff = User::find($id);
         if (!$staff) {
             return response()->json(['message' => 'Staff not found'], 404);
         }
-
         $staff->delete();
         return response()->json(['message' => 'Staff deleted']);
     }

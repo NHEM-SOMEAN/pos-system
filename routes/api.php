@@ -8,6 +8,7 @@ use App\Http\Controllers\API\OrderController;
 use App\Http\Controllers\API\StaffController;
 use App\Http\Controllers\API\DashboardController;
 use App\Http\Controllers\API\AttendanceController;
+use App\Http\Controllers\API\KHQRController;
 
 // Public routes
 Route::post('/login', [AuthController::class, 'login']);
@@ -39,4 +40,6 @@ Route::middleware('auth:sanctum')->group(function () {
     Route::get('/attendance', [AttendanceController::class, 'index']);
     Route::post('/orders/{id}/archive', [OrderController::class, 'archive']);
     Route::post('/orders/{id}/unarchive', [OrderController::class, 'unarchive']);
+    Route::post('/khqr/generate', [KHQRController::class, 'generate']);
+    Route::post('/khqr/check', [KHQRController::class, 'check']);
     });

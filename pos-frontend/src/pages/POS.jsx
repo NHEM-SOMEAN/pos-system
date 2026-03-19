@@ -5,6 +5,7 @@ import { useLang } from '../context/LanguageContext'
 import { useToast, ToastContainer } from '../components/Toast'
 import Spinner from '../components/Spinner'
 import Receipt from '../components/Receipt'
+import { QRCodeSVG } from 'qrcode.react'
 
 export default function POS() {
   const { t } = useLang()
@@ -53,27 +54,47 @@ export default function POS() {
   const total = Math.max(0, subtotal - discount)
   const change = cashReceived ? Math.max(0, parseFloat(cashReceived) - total) : 0
 
-  const handleCheckout = async (method) => {
+ const handleCheckout = async (method) => {
   if (cart.length === 0) { toast.error('Cart ទទេ!'); return }
   if (method === 'khqr') {
     setQrModal(true)
     setQrPolling(true)
     setLoading(true)
     try {
-      const res = await api.post('/orders', {
+      const orderRes = await api.post('/orders', {
         items: cart.map(i => ({ product_id: i.id, quantity: i.quantity })),
         payment_method: 'khqr',
         discount: discount,
       })
-      setQrOrder(res.data)
-      // Mock polling — simulate payment confirmed after 10s
+      const khqrRes = await api.post('/khqr/generate', {
+        amount: total,
+        order_id: orderRes.data.id,
+      })
+      setQrOrder({ ...orderRes.data, qr: khqrRes.data.qr, md5: khqrRes.data.md5 })
+      const pollInterval = setInterval(async () => {
+        try {
+          const checkRes = await api.post('/khqr/check', {
+            md5: khqrRes.data.md5,
+            order_id: orderRes.data.id,
+          })
+         if (checkRes.data.status === 'paid') {
+            clearInterval(pollInterval)
+            setQrPolling(false)
+            const orderDetail = await api.get(`/orders/${orderRes.data.id}`)
+            setReceiptOrder(orderDetail.data)
+            clearCart()
+            setQrModal(false)
+            setQrOrder(null)
+            toast.success(`✅ Order #${orderRes.data.id} ជោគជ័យ!`)
+          }
+        } catch (e) {
+          console.error('Polling error:', e)
+        }
+      }, 3000)
       setTimeout(() => {
+        clearInterval(pollInterval)
         setQrPolling(false)
-        toast.success(`✅ Order #${res.data.id} ជោគជ័យ!`)
-        clearCart()
-        setQrModal(false)
-        setQrOrder(null)
-      }, 10000)
+      }, 5 * 60 * 1000)
     } catch (err) {
       toast.error(err.response?.data?.message || 'មានបញ្ហា')
       setQrModal(false)
@@ -98,7 +119,6 @@ export default function POS() {
     setLoading(false)
   }
 }
-
   const S = {
     container: { display: 'flex', gap: '20px', height: 'calc(100vh - 140px)' },
     left: { flex: 1, display: 'flex', flexDirection: 'column', gap: '16px', overflow: 'hidden' },
@@ -263,26 +283,40 @@ export default function POS() {
         </div>
       </div>
 
-     {qrModal && qrOrder && (
-  <div style={{ position: 'fixed', inset: 0, background: 'rgba(0,0,0,0.6)', display: 'flex', alignItems: 'center', justifyContent: 'center', zIndex: 1000 }}>
-    <div style={{ background: 'white', borderRadius: '16px', padding: '32px', width: '340px', textAlign: 'center' }}>
-      <h2 style={{ fontSize: '18px', fontWeight: '700', marginBottom: '4px' }}>📱 បង់ដោយ KHQR</h2>
-      <p style={{ color: '#64748b', fontSize: '13px', marginBottom: '20px' }}>Order #{qrOrder.id} — Total: <strong style={{ color: '#3b82f6' }}>${qrOrder.total}</strong></p>
+    {qrModal && qrOrder && (
+      <div style={{ position: 'fixed', inset: 0, background: 'rgba(0,0,0,0.6)', display: 'flex', alignItems: 'center', justifyContent: 'center', zIndex: 1000 }}>
+        <div style={{ background: 'white', borderRadius: '16px', padding: '32px', width: '340px', textAlign: 'center' }}>
+          <h2 style={{ fontSize: '18px', fontWeight: '700', marginBottom: '4px' }}>📱 បង់ដោយ KHQR</h2>
+          <p style={{ color: '#64748b', fontSize: '13px', marginBottom: '20px' }}>
+            Order #{qrOrder.id} — Total: <strong style={{ color: '#3b82f6' }}>${qrOrder.total}</strong>
+          </p>
 
-      {/* Mock QR Code */}
-      <div style={{ background: '#f8fafc', border: '2px dashed #3b82f6', borderRadius: '12px', padding: '20px', marginBottom: '20px' }}>
-        <img
-          src={`https://api.qrserver.com/v1/create-qr-code/?size=180x180&data=KHQR-MOCK-ORDER-${qrOrder.id}-TOTAL-${qrOrder.total}`}
-          alt="KHQR Mock"
-          style={{ width: '180px', height: '180px' }}
-        />
+          {/* Real KHQR QR Code */}
+          <div style={{ background: '#f8fafc', border: '2px dashed #3b82f6', borderRadius: '12px', padding: '20px', marginBottom: '20px' }}>
+            <QRCodeSVG
+      value={qrOrder.qr || ''}
+      size={200}
+      level="M"
+      includeMargin={true}
+      imageSettings={{
+        src: 'https://bakong.nbc.gov.kh/images/logo.svg',
+        x: undefined,
+        y: undefined,
+        height: 40,
+        width: 40,
+        excavate: true,
+      }}
+    />
       </div>
 
       {qrPolling ? (
         <div style={{ color: '#64748b', fontSize: '13px', marginBottom: '16px' }}>
           <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'center', gap: '8px' }}>
             <div style={{ width: '12px', height: '12px', border: '2px solid #3b82f6', borderTopColor: 'transparent', borderRadius: '50%', animation: 'spin 1s linear infinite' }}></div>
-            កំពុង រង់ចាំ payment... (Mock: 10s)
+            កំពុង រង់ចាំ payment...
+          </div>
+          <div style={{ fontSize: '11px', color: '#94a3b8', marginTop: '6px' }}>
+            Scan QR ដោយ ABA / ACLEDA / Wing
           </div>
         </div>
       ) : (
@@ -298,9 +332,8 @@ export default function POS() {
     </div>
   </div>
 )}
-     <Receipt order={receiptOrder} onClose={() => setReceiptOrder(null)} />
-      <ToastContainer toasts={toasts} />
-      <ToastContainer toasts={toasts} />
-    </Layout>
+      <Receipt order={receiptOrder} onClose={() => setReceiptOrder(null)} />
+    <ToastContainer toasts={toasts} />
+  </Layout>
   )
 }
