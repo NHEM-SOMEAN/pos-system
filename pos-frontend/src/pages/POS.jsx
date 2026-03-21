@@ -1,6 +1,5 @@
 import { useEffect, useState } from 'react'
 import Layout from '../components/Layout'
-import api from '../api/axios'
 import { useLang } from '../context/LanguageContext'
 import { useToast, ToastContainer } from '../components/Toast'
 import Spinner from '../components/Spinner'

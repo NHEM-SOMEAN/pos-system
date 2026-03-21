@@ -1,6 +1,5 @@
 import { useEffect, useState } from 'react'
 import Layout from '../components/Layout'
-import api from '../api/axios'
 import { useLang } from '../context/LanguageContext'
 import api, { STORAGE_URL } from '../api/axios'
 
