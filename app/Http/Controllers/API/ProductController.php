@@ -18,36 +18,39 @@ class ProductController extends Controller
 
     // POST /api/products
     public function store(Request $request)
-    {
-        if ($request->user()->role !== 'admin') {
-            return response()->json(['message' => 'Unauthorized. Admin only.'], 403);
-        }
-
-        $request->validate([
-            'category_id'  => 'required|exists:categories,id',
-            'name'         => 'required|string|max:255',
-            'price'        => 'required|numeric|min:0',
-            'stock'        => 'required|integer|min:0',
-            'barcode'      => 'nullable|string',
-            'image'        => 'nullable|image|mimes:jpg,jpeg,png|max:2048',
-        ]);
-
-        $imagePath = null;
-        if ($request->hasFile('image')) {
-            $imagePath = $request->file('image')->store('products', 'public');
-        }
-
-        $product = Product::create([
-            'category_id' => $request->category_id,
-            'name'        => $request->name,
-            'price'       => $request->price,
-            'stock'       => $request->stock,
-            'barcode'     => $request->barcode,
-            'image'       => $imagePath,
-        ]);
-
-        return response()->json($product->load('category'), 201);
+{
+    if ($request->user()->role !== 'admin') {
+        return response()->json(['message' => 'Unauthorized. Admin only.'], 403);
     }
+
+    $request->validate([
+        'category_id'  => 'required|exists:categories,id',
+        'name'         => 'required|string|max:255',
+        'price'        => 'required|numeric|min:0',
+        'stock'        => 'required|integer|min:0',
+        'barcode'      => 'nullable|string',
+        'image'        => 'nullable|image|mimes:jpg,jpeg,png|max:2048',
+    ]);
+
+    $imagePath = null;
+    if ($request->hasFile('image')) {
+        $uploaded = cloudinary()->upload($request->file('image')->getRealPath(), [
+            'folder' => 'pos-system/products'
+        ]);
+        $imagePath = $uploaded->getSecurePath();
+    }
+
+    $product = Product::create([
+        'category_id' => $request->category_id,
+        'name'        => $request->name,
+        'price'       => $request->price,
+        'stock'       => $request->stock,
+        'barcode'     => $request->barcode,
+        'image'       => $imagePath,
+    ]);
+
+    return response()->json($product->load('category'), 201);
+}
 
     // GET /api/products/{id}
     public function show($id)
