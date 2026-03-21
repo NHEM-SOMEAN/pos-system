@@ -32,13 +32,26 @@ class ProductController extends Controller
         'image'        => 'nullable|image|mimes:jpg,jpeg,png|max:2048',
     ]);
 
-    $imagePath = null;
-    if ($request->hasFile('image')) {
-        $uploaded = cloudinary()->upload($request->file('image')->getRealPath(), [
-            'folder' => 'pos-system/products'
-        ]);
-        $imagePath = $uploaded->getSecurePath();
-    }
+            $imagePath = null;
+            if ($request->hasFile('image')) {
+                try {
+                    \Cloudinary\Configuration\Configuration::instance([
+                        'cloud' => [
+                            'cloud_name' => env('CLOUDINARY_CLOUD_NAME'),
+                            'api_key'    => env('CLOUDINARY_API_KEY'),
+                            'api_secret' => env('CLOUDINARY_API_SECRET'),
+                        ],
+                        'url' => ['secure' => true]
+                    ]);
+                    $result = (new \Cloudinary\Api\Upload\UploadApi())->upload(
+                        $request->file('image')->getRealPath(),
+                        ['folder' => 'pos-system/products']
+                    );
+                    $imagePath = $result['secure_url'];
+                } catch (\Exception $e) {
+                    $imagePath = $request->file('image')->store('products', 'public');
+                }
+            }
 
     $product = Product::create([
         'category_id' => $request->category_id,
