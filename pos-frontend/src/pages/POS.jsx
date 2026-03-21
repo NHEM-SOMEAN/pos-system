@@ -236,7 +236,7 @@ export default function POS() {
               <div key={product.id} style={S.productCard(product.stock <= 0)} onClick={() => addToCart(product)}>
                 <div style={{ background: '#f8fafc', borderRadius: '8px', height: '100px', display: 'flex', alignItems: 'center', justifyContent: 'center', fontSize: '28px', marginBottom: '8px', overflow: 'hidden' }}>
                   {product.image
-                    ? <img src={`${STORAGE_URL}/${product.image}`} style={{ width: '100%', height: '100%', objectFit: 'contain', padding: '6px' }} />
+                    ? <img src={product.image?.startsWith('http') ? product.image : `${STORAGE_URL}/${product.image}`} style={{ width: '100%', height: '100%', objectFit: 'contain', padding: '6px' }} />
                     : '📦'
                   }
                 </div>

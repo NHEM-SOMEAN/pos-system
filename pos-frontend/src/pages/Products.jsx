@@ -129,7 +129,7 @@ export default function Products() {
                     <td style={{ padding: '12px 16px', borderBottom: '1px solid #f8fafc' }}>
                       <div style={{ display: 'flex', alignItems: 'center', gap: '12px' }}>
                         <div style={{ width: '38px', height: '38px', background: '#f1f5f9', borderRadius: '8px', overflow: 'hidden', display: 'flex', alignItems: 'center', justifyContent: 'center', flexShrink: 0 }}>
-                          {p.image ? <img src={`${STORAGE_URL}/${p.image}`} style={{ width: '38px', height: '38px', objectFit: 'cover' }} /> : '📦'}
+                          {p.image ? <img src={p.image?.startsWith('http') ? p.image : `${STORAGE_URL}/${p.image}`} style={{ width: '38px', height: '38px', objectFit: 'cover' }} /> : '📦'}
                         </div>
                         <div>
                           <div style={{ fontWeight: '600', color: '#0f172a' }}>{p.name}</div>
