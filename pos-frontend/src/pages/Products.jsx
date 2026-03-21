@@ -2,6 +2,7 @@ import { useEffect, useState } from 'react'
 import Layout from '../components/Layout'
 import api from '../api/axios'
 import { useLang } from '../context/LanguageContext'
+import api, { STORAGE_URL } from '../api/axios'
 
 const emptyForm = { category_id: '', name: '', price: '', stock: '', barcode: '' }
 
@@ -110,7 +111,7 @@ export default function Products() {
                   <td style={S.td}>
                     <div style={{ display: 'flex', alignItems: 'center', gap: '12px' }}>
                       <div style={{ width: '38px', height: '38px', background: '#f1f5f9', borderRadius: '8px', display: 'flex', alignItems: 'center', justifyContent: 'center', fontSize: '18px', flexShrink: 0 }}>
-                        {p.image ? <img src={`http://127.0.0.1:8000/storage/${p.image}`} style={{ width: '38px', height: '38px', objectFit: 'cover', borderRadius: '8px' }} /> : '📦'}
+                        {p.image ? <img src={`http://${STORAGE_URL}/${p.image}`} style={{ width: '38px', height: '38px', objectFit: 'cover', borderRadius: '8px' }} /> : '📦'}
                       </div>
                       <div>
                         <div style={{ fontWeight: '600', color: '#0f172a' }}>{p.name}</div>

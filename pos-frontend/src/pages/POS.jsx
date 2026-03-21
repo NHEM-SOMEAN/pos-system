@@ -6,6 +6,7 @@ import { useToast, ToastContainer } from '../components/Toast'
 import Spinner from '../components/Spinner'
 import Receipt from '../components/Receipt'
 import { QRCodeSVG } from 'qrcode.react'
+import api, { STORAGE_URL } from '../api/axios'
 
 export default function POS() {
   const { t } = useLang()
@@ -182,7 +183,7 @@ export default function POS() {
                 }}>
                   {product.image 
                     ? <img 
-                        src={`http://127.0.0.1:8000/storage/${product.image}`} 
+                        src={`http://${STORAGE_URL}/${product.image}`} 
                         style={{ 
                           width: '100%', 
                           height: '100%', 

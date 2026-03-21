@@ -27,5 +27,7 @@ api.interceptors.response.use(
     return Promise.reject(error)
   }
 )
-
+export const STORAGE_URL = import.meta.env.VITE_API_URL 
+  ? import.meta.env.VITE_API_URL.replace('/api', '/storage')
+  : 'http://127.0.0.1:8000/storage'
 export default api
