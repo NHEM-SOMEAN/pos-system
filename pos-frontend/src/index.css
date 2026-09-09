@@ -7,10 +7,12 @@
 }
 
 body {
-  font-family: 'Inter', sans-serif;
+  font-family: 'Hanuman', 'Inter', sans-serif;
+  word-break: break-word;
+  overflow-wrap: break-word;
+  line-height: 1.6;
 }
 
-/* Khmer font class */
 .font-khmer {
   font-family: 'Hanuman', 'Inter', sans-serif;
 }

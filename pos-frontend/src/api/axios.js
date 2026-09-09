@@ -1,7 +1,7 @@
 import axios from 'axios'
 
 const api = axios.create({
-  baseURL: 'https://pos-system-production-c99e.up.railway.app/api',
+  baseURL: import.meta.env.VITE_API_URL || 'http://127.0.0.1:8000/api', // ✅
   headers: {
     'Accept': 'application/json',
     'Content-Type': 'application/json',
@@ -27,7 +27,9 @@ api.interceptors.response.use(
     return Promise.reject(error)
   }
 )
-export const STORAGE_URL = import.meta.env.VITE_API_URL 
+
+export const STORAGE_URL = import.meta.env.VITE_API_URL
   ? import.meta.env.VITE_API_URL.replace('/api', '/storage')
   : 'http://127.0.0.1:8000/storage'
+
 export default api
