@@ -1,0 +1,8 @@
+{
+  "deploy": {
+    "webroot": "/public"
+  },
+  "hooks": {
+    "postBuild": "php artisan migrate --force && php artisan config:cache && php artisan storage:link"
+  }
+}
